@@ -107,6 +107,10 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
         
+      - name: Get lowercase repo name
+        id: repo_name
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
@@ -123,7 +127,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ steps.repo_name.outputs.REPO_LC }}:${{ steps.get_version.outputs.VERSION }}
+            ghcr.io/${{ steps.repo_name.outputs.REPO_LC }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+

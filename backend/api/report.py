@@ -35,7 +35,7 @@ class ReportRequest(BaseModel):
 
 
 @router.post("", response_class=HTMLResponse)
-async def generate_report(request: ReportRequest):
+async def generate_report(request: ReportRequest) -> HTMLResponse:
     """
     Generate comprehensive HTML report for dataset analysis.
 

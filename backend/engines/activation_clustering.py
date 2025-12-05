@@ -6,7 +6,7 @@ and finding clusters misaligned with labels.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from sklearn.cluster import DBSCAN, KMeans
@@ -33,11 +33,11 @@ class ClusteringResult:
 class SimpleFeatureExtractor:
     """Simple feature extractor simulating neural network activations."""
 
-    def __init__(self, hidden_dim: int = 128, seed: int = 42):
+    def __init__(self, hidden_dim: int = 128, seed: int = 42) -> None:
         self.hidden_dim = hidden_dim
         self.seed = seed
         np.random.seed(seed)
-        self.projection = None
+        self.projection: Optional[np.ndarray] = None
 
     def fit(self, data: np.ndarray, labels: np.ndarray) -> "SimpleFeatureExtractor":
         """Fit the feature extractor."""

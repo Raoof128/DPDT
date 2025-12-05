@@ -58,7 +58,7 @@ def compute_array_hash(array: np.ndarray) -> str:
 
 def compute_dataset_fingerprint(
     data: np.ndarray, labels: np.ndarray, metadata: Optional[Dict[str, Any]] = None
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
     """
     Compute comprehensive fingerprint for a dataset.
 

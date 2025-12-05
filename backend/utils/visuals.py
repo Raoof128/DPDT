@@ -6,7 +6,7 @@ Generate charts, heatmaps, and clustering visualizations.
 
 import base64
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -43,7 +43,7 @@ def create_spectral_plot(
 def create_scatter_plot(
     embeddings: np.ndarray,
     labels: np.ndarray,
-    suspected: List[int] = None,
+    suspected: Optional[List[int]] = None,
     title: str = "2D Projection",
 ) -> str:
     """Create 2D scatter plot with suspected samples highlighted."""
@@ -53,7 +53,7 @@ def create_scatter_plot(
     fig, ax = plt.subplots(figsize=(10, 8))
 
     unique_labels = np.unique(labels)
-    colors = plt.cm.tab10(np.linspace(0, 1, len(unique_labels)))
+    colors = plt.cm.tab10(np.linspace(0, 1, len(unique_labels)))  # type: ignore[attr-defined]
 
     for i, label in enumerate(unique_labels):
         mask = labels == label
@@ -135,7 +135,7 @@ def create_bar_chart(values: Dict[str, float], title: str = "Scores") -> str:
 
     names = list(values.keys())
     scores = list(values.values())
-    colors = plt.cm.viridis(np.linspace(0.2, 0.8, len(names)))
+    colors = plt.cm.viridis(np.linspace(0.2, 0.8, len(names)))  # type: ignore[attr-defined]
 
     bars = ax.bar(names, scores, color=colors)
     ax.set_ylabel("Score")

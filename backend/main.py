@@ -8,6 +8,7 @@ All data is SYNTHETIC and SAFE for educational purposes.
 """
 
 from pathlib import Path
+from typing import Any, Dict, Union
 
 import uvicorn
 from fastapi import FastAPI
@@ -73,13 +74,13 @@ if frontend_path.exists():
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> Dict[str, str]:
     """Health check endpoint."""
     return {"status": "healthy", "version": APP_VERSION, "service": APP_TITLE}
 
 
-@app.get("/dashboard")
-async def serve_dashboard():
+@app.get("/dashboard", response_model=None)
+async def serve_dashboard() -> Union[FileResponse, Dict[str, str]]:
     """Serve the dashboard HTML."""
     dashboard_path = frontend_path / "index.html"
     if dashboard_path.exists():
@@ -88,7 +89,7 @@ async def serve_dashboard():
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint with API information."""
     return {
         "name": APP_TITLE,

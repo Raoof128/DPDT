@@ -352,8 +352,8 @@ class DatasetValidator:
         )
 
         return ValidationResult(
-            is_valid=is_valid,
-            quality_score=quality_score,
+            is_valid=bool(is_valid),
+            quality_score=float(quality_score),
             anomalies=anomalies,
             warnings=warnings,
             fingerprint=fingerprint,
@@ -454,8 +454,8 @@ class DatasetValidator:
         issues = []
         score = 100.0
 
-        nan_count = np.sum(np.isnan(dataset.data))
-        inf_count = np.sum(np.isinf(dataset.data))
+        nan_count: int = int(np.sum(np.isnan(dataset.data)))
+        inf_count: int = int(np.sum(np.isinf(dataset.data)))
 
         if nan_count > 0:
             ratio = nan_count / dataset.data.size
@@ -535,7 +535,7 @@ class DatasetValidator:
         lower_bound = q1 - 3 * iqr
         upper_bound = q3 + 3 * iqr
 
-        outlier_count = np.sum((flat_data < lower_bound) | (flat_data > upper_bound))
+        outlier_count: int = int(np.sum((flat_data < lower_bound) | (flat_data > upper_bound)))
         outlier_ratio = outlier_count / len(flat_data)
 
         if outlier_ratio > 0.05:

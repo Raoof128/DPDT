@@ -86,9 +86,9 @@ class SpectralSignaturesDetector:
         singular_values = svd.singular_values_
 
         # Analyze per class
-        suspected_indices = []
+        suspected_indices: List[int] = []
         outlier_scores = np.zeros(len(data))
-        details = {}
+        details: Dict[str, Any] = {}
 
         unique_labels = np.unique(labels)
         for label in unique_labels:
@@ -119,7 +119,7 @@ class SpectralSignaturesDetector:
             # Store scores
             outlier_scores[class_indices] = z_scores
 
-            details[int(label)] = {
+            details[str(label)] = {
                 "n_samples": len(class_indices),
                 "n_suspected": len(outliers),
             }

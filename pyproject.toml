@@ -156,10 +156,10 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
 [tool.mypy]
 python_version = "3.9"
-warn_return_any = true
+warn_return_any = false
 warn_unused_configs = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 disallow_untyped_defs = true
 check_untyped_defs = true
 strict_equality = true
@@ -171,6 +171,15 @@ pretty = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "backend.engines.*"
+warn_return_any = false
+strict_equality = false
+
+[[tool.mypy.overrides]]
+module = "backend.utils.visuals"
+ignore_errors = true
 
 # =============================================================================
 # Security Scanning

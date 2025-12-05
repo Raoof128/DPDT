@@ -6,7 +6,7 @@ Computes training-time risk scores for dataset quality.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -36,8 +36,8 @@ class RiskResult:
 class CollapseRiskEngine:
     """Compute model collapse risk from dataset characteristics."""
 
-    def __init__(self):
-        self.risk_weights = {
+    def __init__(self) -> None:
+        self.risk_weights: Dict[str, float] = {
             "overfit_potential": 0.2,
             "representation_collapse": 0.25,
             "class_boundary_distortion": 0.2,
@@ -49,7 +49,7 @@ class CollapseRiskEngine:
         self,
         data: np.ndarray,
         labels: np.ndarray,
-        poisoning_info: Dict[str, Any] = None,
+        poisoning_info: Optional[Dict[str, Any]] = None,
     ) -> RiskResult:
         """Assess collapse risk for dataset."""
         logger.info(f"Assessing collapse risk for {len(data)} samples")
@@ -140,8 +140,8 @@ class CollapseRiskEngine:
             total_var = (s**2).sum()
             cumvar = np.cumsum(s**2) / total_var
             effective_rank = np.searchsorted(cumvar, 0.95) + 1
-            rank_ratio = effective_rank / min(data.shape)
-        except:
+            rank_ratio = float(effective_rank / min(data.shape))
+        except Exception:
             rank_ratio = 1.0
 
         risk = low_var_ratio * 0.5 + (1 - rank_ratio) * 0.5
@@ -156,14 +156,14 @@ class CollapseRiskEngine:
             if len(unique_labels) < 2:
                 return 0.0
 
-            centroids = []
+            centroid_list = []
             for label in unique_labels:
-                centroids.append(np.mean(data[labels == label], axis=0))
+                centroid_list.append(np.mean(data[labels == label], axis=0))
 
-            centroids = np.array(centroids)
+            centroids = np.array(centroid_list)
             # Average distance between centroids
             dists = np.linalg.norm(centroids[:, None] - centroids, axis=2)
-            avg_dist = np.mean(dists[dists > 0])
+            avg_dist = float(np.mean(dists[dists > 0]))
 
             # Normalize (heuristic)
             score = max(0.0, 100.0 - avg_dist * 10)

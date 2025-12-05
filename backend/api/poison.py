@@ -86,8 +86,8 @@ async def detect_poison(request: DetectRequest) -> DetectResponse:
             )
 
         ground_truth = dataset.metadata.get("poison_indices", [])
-        all_suspected = set()
-        results = {}
+        all_suspected: set[int] = set()
+        results: Dict[str, Dict[str, Any]] = {}
 
         # 1. Spectral Signatures
         if request.run_spectral:

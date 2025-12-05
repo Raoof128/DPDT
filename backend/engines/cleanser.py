@@ -124,7 +124,7 @@ class DatasetCleanser:
             for label, centroid in centroids.items():
                 distances[label] = np.linalg.norm(sample - centroid)
 
-            nearest_label = min(distances, key=distances.get)
+            nearest_label = min(distances.keys(), key=lambda k: distances[k])
 
             if nearest_label != current_label:
                 suggestions.append(

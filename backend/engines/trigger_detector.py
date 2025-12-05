@@ -20,9 +20,9 @@ class TriggerResult:
         self,
         poisoning_score: float,
         detected_triggers: List[Dict[str, Any]],
-        suspicious_patterns: List[str],
+        suspicious_patterns: List[Dict[str, Any]],
         trigger_heatmap: Optional[np.ndarray] = None,
-    ):
+    ) -> None:
         """Initialize result."""
         self.poisoning_score = poisoning_score
         self.detected_triggers = detected_triggers
@@ -165,8 +165,8 @@ class TextTriggerDetector:
                     detected_triggers.append(result)
 
         # Check for repeated subsequences
-        result = self._check_repeated_patterns(texts, labels)
-        detected_triggers.extend(result)
+        repeated_result = self._check_repeated_patterns(texts, labels)
+        detected_triggers.extend(repeated_result)
 
         poisoning_score = self._compute_score(detected_triggers)
 
@@ -217,7 +217,7 @@ class TextTriggerDetector:
         # Check last 5 tokens as potential trigger sequence
         if texts.shape[1] >= 5:
             last_5 = texts[:, -5:]
-            pattern_map = {}
+            pattern_map: Dict[tuple, List[int]] = {}
 
             for i, pattern in enumerate(last_5):
                 key = tuple(pattern.tolist())
@@ -249,7 +249,7 @@ class TextTriggerDetector:
 class UniversalTriggerDetector:
     """Universal trigger detector for any data type."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.image_detector = ImageTriggerDetector()
         self.text_detector = TextTriggerDetector()
 

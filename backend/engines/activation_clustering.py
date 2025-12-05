@@ -150,7 +150,9 @@ class ActivationClusteringDetector:
             return {"suspected": [], "misaligned": None}
 
         # Find smallest cluster (likely poisoned)
-        cluster_sizes = [(c, np.sum(cluster_labels == c)) for c in unique_clusters]
+        cluster_sizes: List[tuple] = [
+            (c, int(np.sum(cluster_labels == c))) for c in unique_clusters
+        ]
         cluster_sizes.sort(key=lambda x: x[1])
         smallest_cluster = cluster_sizes[0][0]
         smallest_size = cluster_sizes[0][1]

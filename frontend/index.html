@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Poisoning Detection Tool</title>
+    <meta name="description" content="Comprehensive platform for detecting training data poisoning attacks">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">Poison Detector</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="scan">
+                    <span class="nav-icon">🔍</span>
+                    <span>Scan Dataset</span>
+                </a>
+                <a href="#" class="nav-item" data-section="detect">
+                    <span class="nav-icon">⚠️</span>
+                    <span>Detect Poison</span>
+                </a>
+                <a href="#" class="nav-item" data-section="clean">
+                    <span class="nav-icon">🧹</span>
+                    <span>Clean Data</span>
+                </a>
+                <a href="#" class="nav-item" data-section="risk">
+                    <span class="nav-icon">📈</span>
+                    <span>Risk Analysis</span>
+                </a>
+                <a href="#" class="nav-item" data-section="docs">
+                    <span class="nav-icon">📚</span>
+                    <span>Documentation</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator online"></div>
+                <span>System Healthy</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p class="breadcrumb">Data Poisoning Detection Tool</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search..." id="search-input">
+                    </div>
+                    <button class="btn-icon" id="refresh-btn" title="Refresh">🔄</button>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card gradient-blue">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-content">
+                            <h3>Datasets Scanned</h3>
+                            <p class="stat-value" id="stat-scanned">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-purple">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3>Threats Detected</h3>
+                            <p class="stat-value" id="stat-threats">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-green">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3>Datasets Cleaned</h3>
+                            <p class="stat-value" id="stat-cleaned">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card gradient-orange">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-content">
+                            <h3>Avg Risk Score</h3>
+                            <p class="stat-value" id="stat-risk">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h2>Poisoning Score Distribution</h2>
+                            <span class="badge badge-info">Live</span>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="poisoning-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h2>Detection Methods</h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="methods-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card recent-activity">
+                        <div class="card-header">
+                            <h2>Recent Activity</h2>
+                        </div>
+                        <div class="card-body">
+                            <ul class="activity-list" id="activity-list">
+                                <li class="activity-item">
+                                    <span class="activity-icon success">✓</span>
+                                    <div class="activity-content">
+                                        <p>System initialized</p>
+                                        <span class="activity-time">Just now</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scan Section -->
+            <section id="scan-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🔍 Dataset Scanner</h2>
+                        <p>Validate and fingerprint synthetic datasets</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="scan-form" class="form-grid">
+                            <div class="form-group">
+                                <label for="scan-type">Dataset Type</label>
+                                <select id="scan-type" class="form-control">
+                                    <option value="image">Image (MNIST-like)</option>
+                                    <option value="text">Text</option>
+                                    <option value="tabular">Tabular</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scan-samples">Number of Samples</label>
+                                <input type="number" id="scan-samples" class="form-control" value="1000" min="10" max="10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="scan-classes">Number of Classes</label>
+                                <input type="number" id="scan-classes" class="form-control" value="10" min="2" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="scan-poison">Poison Ratio</label>
+                                <input type="number" id="scan-poison" class="form-control" value="0" min="0" max="0.5" step="0.01">
+                            </div>
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <span class="btn-icon">🔍</span>
+                                    Run Scan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" id="scan-results" style="display: none;">
+                    <div class="card-header">
+                        <h2>Scan Results</h2>
+                    </div>
+                    <div class="card-body" id="scan-results-content"></div>
+                </div>
+            </section>
+
+            <!-- Detect Section -->
+            <section id="detect-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>⚠️ Poison Detection Engine</h2>
+                        <p>Full poisoning detection pipeline with multiple detection methods</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="detect-form" class="form-grid">
+                            <div class="form-group">
+                                <label for="detect-type">Dataset Type</label>
+                                <select id="detect-type" class="form-control">
+                                    <option value="image">Image</option>
+                                    <option value="text">Text</option>
+                                    <option value="tabular">Tabular</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="detect-samples">Number of Samples</label>
+                                <input type="number" id="detect-samples" class="form-control" value="500" min="10" max="5000">
+                            </div>
+                            <div class="form-group">
+                                <label for="detect-poison">Poison Ratio</label>
+                                <input type="number" id="detect-poison" class="form-control" value="0.1" min="0" max="0.5" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Detection Methods</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox"><input type="checkbox" id="method-spectral" checked> Spectral Signatures</label>
+                                    <label class="checkbox"><input type="checkbox" id="method-clustering" checked> Activation Clustering</label>
+                                    <label class="checkbox"><input type="checkbox" id="method-influence" checked> Influence Functions</label>
+                                    <label class="checkbox"><input type="checkbox" id="method-trigger" checked> Trigger Detection</label>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <span class="btn-icon">🔬</span>
+                                    Detect Poisoning
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" id="detect-results" style="display: none;">
+                    <div class="card-header">
+                        <h2>Detection Results</h2>
+                    </div>
+                    <div class="card-body" id="detect-results-content"></div>
+                </div>
+            </section>
+
+            <!-- Clean Section -->
+            <section id="clean-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🧹 Dataset Cleanser</h2>
+                        <p>Remove or relabel suspected poisoned samples</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="clean-form" class="form-grid">
+                            <div class="form-group">
+                                <label for="clean-mode">Cleaning Mode</label>
+                                <select id="clean-mode" class="form-control">
+                                    <option value="safe">SAFE - Remove high confidence only</option>
+                                    <option value="strict">STRICT - Remove all flagged</option>
+                                    <option value="review">REVIEW - Suggestions only</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="clean-threshold">Confidence Threshold</label>
+                                <input type="number" id="clean-threshold" class="form-control" value="0.7" min="0" max="1" step="0.05">
+                            </div>
+                            <div class="form-group">
+                                <label for="clean-samples">Samples</label>
+                                <input type="number" id="clean-samples" class="form-control" value="1000" min="10" max="10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="clean-poison">Poison Ratio</label>
+                                <input type="number" id="clean-poison" class="form-control" value="0.1" min="0" max="0.5" step="0.01">
+                            </div>
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <span class="btn-icon">🧹</span>
+                                    Clean Dataset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" id="clean-results" style="display: none;">
+                    <div class="card-header">
+                        <h2>Cleaning Results</h2>
+                    </div>
+                    <div class="card-body" id="clean-results-content"></div>
+                </div>
+            </section>
+
+            <!-- Risk Section -->
+            <section id="risk-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📈 Collapse Risk Analysis</h2>
+                        <p>Assess model training collapse risk</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="risk-form" class="form-grid">
+                            <div class="form-group">
+                                <label for="risk-samples">Samples</label>
+                                <input type="number" id="risk-samples" class="form-control" value="1000" min="10" max="10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="risk-classes">Classes</label>
+                                <input type="number" id="risk-classes" class="form-control" value="10" min="2" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="risk-poison">Poison Ratio</label>
+                                <input type="number" id="risk-poison" class="form-control" value="0.1" min="0" max="0.5" step="0.01">
+                            </div>
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-warning btn-lg">
+                                    <span class="btn-icon">📊</span>
+                                    Analyze Risk
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" id="risk-results" style="display: none;">
+                    <div class="card-header">
+                        <h2>Risk Assessment</h2>
+                    </div>
+                    <div class="card-body" id="risk-results-content"></div>
+                </div>
+            </section>
+
+            <!-- Documentation Section -->
+            <section id="docs-section" class="section">
+                <div class="docs-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>📖 Spectral Signatures</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Spectral analysis uses SVD/PCA to detect poisoned samples by identifying outliers in the spectral domain. Backdoor triggers often create separable subspaces in the representation space.</p>
+                            <h4>How it works:</h4>
+                            <ol>
+                                <li>Compute feature embeddings for all samples</li>
+                                <li>Apply SVD to get singular vectors</li>
+                                <li>Identify samples with high projections onto top singular vectors</li>
+                                <li>Flag outliers as potentially poisoned</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>🎯 Activation Clustering</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Analyzes intermediate neural network activations to find clusters that don't align with their labels.</p>
+                            <h4>Key insight:</h4>
+                            <p>Poisoned samples often cluster separately from clean samples of the same class in activation space.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>🔍 Trigger Detection</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Identifies synthetic backdoor triggers including:</p>
+                            <ul>
+                                <li>Pixel patch triggers (visual patterns)</li>
+                                <li>Corner watermarks</li>
+                                <li>Text token sequences</li>
+                                <li>Extreme tabular values</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>⚙️ Collapse Risk</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Evaluates dataset safety for model training:</p>
+                            <ul>
+                                <li><strong>Overfit Potential:</strong> High dimensionality vs samples</li>
+                                <li><strong>Representation Collapse:</strong> Low feature variance</li>
+                                <li><strong>Boundary Distortion:</strong> Classes too close</li>
+                                <li><strong>Poisoning Density:</strong> Proportion of suspicious samples</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+    "name": "Data Poisoning Detector Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.11"
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
+                "python.linting.mypyEnabled": true,
+                "python.formatting.provider": "black",
+                "python.formatting.blackPath": "/usr/local/bin/black",
+                "python.sortImports.path": "/usr/local/bin/isort",
+                "python.testing.pytestEnabled": true,
+                "python.testing.pytestArgs": [
+                    "tests"
+                ],
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.organizeImports": "explicit"
+                },
+                "[python]": {
+                    "editor.rulers": [
+                        88,
+                        127
+                    ],
+                    "editor.tabSize": 4
+                },
+                "files.exclude": {
+                    "**/__pycache__": true,
+                    "**/*.pyc": true,
+                    ".pytest_cache": true,
+                    ".mypy_cache": true,
+                    "htmlcov": true,
+                    ".coverage": true
+                }
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.black-formatter",
+                "ms-python.isort",
+                "ms-python.flake8",
+                "ms-python.mypy-type-checker",
+                "charliermarsh.ruff",
+                "tamasfe.even-better-toml",
+                "redhat.vscode-yaml",
+                "GitHub.copilot",
+                "GitHub.vscode-pull-request-github",
+                "eamodio.gitlens"
+            ]
+        }
+    },
+    "forwardPorts": [
+        8000
+    ],
+    "postCreateCommand": "pip install -e '.[dev]' && pre-commit install",
+    "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+    "remoteUser": "vscode",
+    "containerEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUNBUFFERED": "1"
+    },
+    "mounts": [
+        "source=${localWorkspaceFolder}/logs,target=${containerWorkspaceFolder}/logs,type=bind",
+        "source=${localWorkspaceFolder}/reports,target=${containerWorkspaceFolder}/reports,type=bind"
+    ]
+}

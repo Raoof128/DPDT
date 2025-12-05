@@ -1,0 +1,71 @@
+# docker-compose.yml
+# Production-ready Docker Compose configuration for Data Poisoning Detector
+
+version: '3.8'
+
+services:
+  # Main application service
+  detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poison-detector
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=info
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./logs:/app/logs:rw
+      - ./reports:/app/reports:rw
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - detector-network
+
+  # Development service with hot reload
+  detector-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: poison-detector-dev
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=debug
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app/backend:rw
+      - ./frontend:/app/frontend:rw
+      - ./tests:/app/tests:rw
+      - ./logs:/app/logs:rw
+    command: ["uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    profiles:
+      - dev
+    networks:
+      - detector-network
+
+networks:
+  detector-network:
+    driver: bridge
+    name: poison-detector-network
+
+volumes:
+  logs:
+  reports:

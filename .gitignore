@@ -1,0 +1,208 @@
+# =============================================================================
+# Python
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# =============================================================================
+# Virtual Environments
+# =============================================================================
+
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# =============================================================================
+# Testing
+# =============================================================================
+
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+.benchmarks/
+
+# =============================================================================
+# Type Checkers
+# =============================================================================
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# =============================================================================
+# IDEs and Editors
+# =============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw?
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Reports
+reports/
+*.html
+!frontend/*.html
+!docs/*.html
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Secrets / Credentials (NEVER commit these)
+*.pem
+*.key
+secrets.yaml
+secrets.json
+.secrets/
+
+# Local configuration
+local_settings.py
+.env.local
+.env.*.local
+
+# =============================================================================
+# Operating Systems
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# Documentation
+# =============================================================================
+
+site/
+docs/_build/
+.mkdocs/
+
+# =============================================================================
+# Docker
+# =============================================================================
+
+# Ignore docker-compose override files
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Profiling
+*.prof
+*.lprof
+
+# Cython
+*.c
+*.cpp
+cython_debug/
+
+# Ruff
+.ruff_cache/
+
+# Bandit
+bandit-report.json

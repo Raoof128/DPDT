@@ -110,12 +110,8 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "security: marks tests as security tests"
-    )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "security: marks tests as security tests")
 
 
 # Skip slow tests by default in CI unless explicitly requested
@@ -124,7 +120,7 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("-m"):
         # Don't modify if user specified markers
         return
-    
+
     skip_slow = pytest.mark.skip(reason="slow test - use -m slow to run")
     for item in items:
         if "slow" in item.keywords:

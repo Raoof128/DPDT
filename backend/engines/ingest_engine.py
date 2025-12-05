@@ -535,7 +535,9 @@ class DatasetValidator:
         lower_bound = q1 - 3 * iqr
         upper_bound = q3 + 3 * iqr
 
-        outlier_count: int = int(np.sum((flat_data < lower_bound) | (flat_data > upper_bound)))
+        outlier_count: int = int(
+            np.sum((flat_data < lower_bound) | (flat_data > upper_bound))
+        )
         outlier_ratio = outlier_count / len(flat_data)
 
         if outlier_ratio > 0.05:

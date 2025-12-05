@@ -1,6 +1,37 @@
 # API Reference
 
-Comprehensive API documentation for the Data Poisoning Detection Tool.
+Comprehensive API documentation for the Data Poisoning Detection Tool v1.0.2.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Base URL](#base-url)
+- [Authentication](#authentication)
+- [Endpoints](#endpoints)
+  - [Health & Info](#health--info)
+  - [Dataset Scanning](#dataset-scanning)
+  - [Poison Detection](#poison-detection)
+  - [Dataset Cleaning](#dataset-cleaning)
+  - [Risk Assessment](#risk-assessment)
+  - [Report Generation](#report-generation)
+- [Error Handling](#error-handling)
+- [Rate Limiting](#rate-limiting)
+
+---
+
+## Overview
+
+The Data Poisoning Detection Tool API provides RESTful endpoints for:
+
+- Validating and fingerprinting datasets
+- Detecting poisoning attacks using multiple algorithms
+- Cleaning contaminated datasets
+- Assessing training collapse risk
+- Generating compliance reports
+
+All endpoints accept JSON payloads and return JSON responses (except report generation which returns HTML).
+
+---
 
 ## Base URL
 
@@ -8,9 +39,19 @@ Comprehensive API documentation for the Data Poisoning Detection Tool.
 http://localhost:8000
 ```
 
+For production deployments, replace with your domain:
+```
+https://api.yourdomain.com
+```
+
+---
+
 ## Authentication
 
-Currently, the API does not require authentication. For production deployments, consider adding API key or JWT authentication.
+> **Note**: The current version does not require authentication. For production deployments, consider implementing:
+> - API Key authentication (`X-API-Key` header)
+> - JWT Bearer tokens
+> - OAuth 2.0
 
 ---
 
@@ -19,13 +60,14 @@ Currently, the API does not require authentication. For production deployments, 
 ### Health & Info
 
 #### `GET /`
+
 Returns API information and available endpoints.
 
-**Response:**
+**Response** `200 OK`:
 ```json
 {
   "name": "Data Poisoning Detection Tool",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "endpoints": {
     "docs": "/docs",
     "health": "/health",
@@ -43,41 +85,47 @@ Returns API information and available endpoints.
 ---
 
 #### `GET /health`
-Health check endpoint for monitoring.
 
-**Response:**
+Health check endpoint for monitoring and load balancers.
+
+**Response** `200 OK`:
 ```json
 {
   "status": "healthy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "service": "Data Poisoning Detection Tool"
 }
 ```
 
+**Use Case**: Kubernetes liveness/readiness probes, uptime monitoring.
+
 ---
 
 #### `GET /dashboard`
-Serves the web-based dashboard UI.
 
-**Response:** HTML page
+Serves the interactive web-based dashboard UI.
+
+**Response**: HTML page
 
 ---
 
 ### Dataset Scanning
 
 #### `POST /scan`
-Validates and fingerprints a synthetic dataset.
 
-**Request Body:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dataset_type` | string | Yes | One of: `image`, `text`, `tabular` |
-| `n_samples` | integer | No | Number of samples (10-100000, default: 1000) |
-| `n_classes` | integer | No | Number of classes (2-1000, default: 10) |
-| `poison_ratio` | float | No | Ratio of poisoned samples (0.0-0.5, default: 0.0) |
-| `seed` | integer | No | Random seed (default: 42) |
+Validates and fingerprints a synthetic dataset for integrity and quality.
 
-**Example Request:**
+**Request Body**:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `dataset_type` | string | ✅ | - | One of: `image`, `text`, `tabular` |
+| `n_samples` | integer | ❌ | 1000 | Number of samples (10-100,000) |
+| `n_classes` | integer | ❌ | 10 | Number of classes (2-1,000) |
+| `poison_ratio` | float | ❌ | 0.0 | Ratio of poisoned samples (0.0-0.5) |
+| `seed` | integer | ❌ | 42 | Random seed for reproducibility |
+
+**Example Request**:
 ```bash
 curl -X POST http://localhost:8000/scan \
   -H "Content-Type: application/json" \
@@ -89,7 +137,7 @@ curl -X POST http://localhost:8000/scan \
   }'
 ```
 
-**Response:**
+**Response** `200 OK`:
 ```json
 {
   "is_valid": true,
@@ -99,40 +147,54 @@ curl -X POST http://localhost:8000/scan \
   "anomalies": [],
   "warnings": [],
   "fingerprint": {
-    "data_hash": "abc123...",
-    "labels_hash": "def456...",
-    "combined_hash": "ghi789..."
+    "data_hash": "a1b2c3d4e5f6...",
+    "labels_hash": "f6e5d4c3b2a1...",
+    "shape": "(1000, 28, 28, 1)",
+    "dtype": "float64",
+    "n_samples": 1000,
+    "n_classes": 10,
+    "combined_hash": "9f8e7d6c5b4a..."
   },
   "stats": {
     "n_samples": 1000,
     "data_shape": [1000, 28, 28, 1],
     "data_mean": 0.45,
-    "data_std": 0.22
+    "data_std": 0.22,
+    "labels_distribution": {"0": 100, "1": 100, ...}
   }
 }
 ```
+
+**Response Fields**:
+- `is_valid`: Whether the dataset passes all validation checks
+- `quality_score`: Overall quality score (0-100)
+- `fingerprint`: Cryptographic fingerprint for provenance tracking
+- `anomalies`: List of detected data anomalies
+- `warnings`: Non-critical issues found
 
 ---
 
 ### Poison Detection
 
 #### `POST /detect_poison`
-Runs the full poisoning detection pipeline.
 
-**Request Body:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dataset_type` | string | Yes | One of: `image`, `text`, `tabular` |
-| `n_samples` | integer | No | Number of samples (10-50000, default: 1000) |
-| `n_classes` | integer | No | Number of classes (2-100, default: 10) |
-| `poison_ratio` | float | No | Ratio of poisoned samples (0.0-0.5, default: 0.1) |
-| `seed` | integer | No | Random seed (default: 42) |
-| `run_spectral` | boolean | No | Run spectral signatures (default: true) |
-| `run_clustering` | boolean | No | Run activation clustering (default: true) |
-| `run_influence` | boolean | No | Run influence estimation (default: true) |
-| `run_trigger` | boolean | No | Run trigger detection (default: true) |
+Runs the full poisoning detection pipeline with multiple algorithms.
 
-**Example Request:**
+**Request Body**:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `dataset_type` | string | ✅ | - | One of: `image`, `text`, `tabular` |
+| `n_samples` | integer | ❌ | 1000 | Number of samples (10-50,000) |
+| `n_classes` | integer | ❌ | 10 | Number of classes (2-100) |
+| `poison_ratio` | float | ❌ | 0.1 | Ratio of poisoned samples (0.0-0.5) |
+| `seed` | integer | ❌ | 42 | Random seed |
+| `run_spectral` | boolean | ❌ | true | Enable spectral signatures analysis |
+| `run_clustering` | boolean | ❌ | true | Enable activation clustering |
+| `run_influence` | boolean | ❌ | true | Enable influence estimation |
+| `run_trigger` | boolean | ❌ | true | Enable trigger detection |
+
+**Example Request**:
 ```bash
 curl -X POST http://localhost:8000/detect_poison \
   -H "Content-Type: application/json" \
@@ -148,7 +210,7 @@ curl -X POST http://localhost:8000/detect_poison \
   }'
 ```
 
-**Response:**
+**Response** `200 OK`:
 ```json
 {
   "poisoning_score": 45.5,
@@ -184,30 +246,44 @@ curl -X POST http://localhost:8000/detect_poison \
 }
 ```
 
+**Detection Algorithms**:
+
+| Algorithm | Description | Best For |
+|-----------|-------------|----------|
+| Spectral | SVD-based outlier detection | Backdoor attacks |
+| Clustering | Activation-based clustering | Label-flipping |
+| Influence | Impact estimation | High-influence samples |
+| Trigger | Pattern detection | Visual/textual triggers |
+
 ---
 
 ### Dataset Cleaning
 
 #### `POST /clean`
-Removes or flags suspected poisoned samples.
 
-**Request Body:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dataset_type` | string | No | One of: `image`, `tabular` (default: `image`) |
-| `n_samples` | integer | No | Number of samples (10-50000, default: 1000) |
-| `n_classes` | integer | No | Number of classes (2-100, default: 10) |
-| `poison_ratio` | float | No | Ratio of poisoned samples (0.0-0.5, default: 0.1) |
-| `seed` | integer | No | Random seed (default: 42) |
-| `mode` | string | No | Cleaning mode: `strict`, `safe`, `review` (default: `safe`) |
-| `confidence_threshold` | float | No | Confidence threshold (0.0-1.0, default: 0.7) |
+Removes or flags suspected poisoned samples from the dataset.
 
-**Cleaning Modes:**
-- **strict**: Remove all flagged samples
-- **safe**: Remove only high-confidence detections
-- **review**: Generate suggestions without removal
+**Request Body**:
 
-**Response:**
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `dataset_type` | string | ❌ | `image` | One of: `image`, `tabular` |
+| `n_samples` | integer | ❌ | 1000 | Number of samples (10-50,000) |
+| `n_classes` | integer | ❌ | 10 | Number of classes (2-100) |
+| `poison_ratio` | float | ❌ | 0.1 | Ratio of poisoned samples |
+| `seed` | integer | ❌ | 42 | Random seed |
+| `mode` | string | ❌ | `safe` | Cleaning mode (see below) |
+| `confidence_threshold` | float | ❌ | 0.7 | Confidence threshold (0.0-1.0) |
+
+**Cleaning Modes**:
+
+| Mode | Description | Removes |
+|------|-------------|---------|
+| `strict` | Aggressive cleaning | All flagged samples |
+| `safe` | Balanced approach | High-confidence detections |
+| `review` | Manual review | None (suggestions only) |
+
+**Response** `200 OK`:
 ```json
 {
   "original_samples": 1000,
@@ -216,7 +292,12 @@ Removes or flags suspected poisoned samples.
   "removal_ratio": 0.085,
   "removed_indices": [12, 45, 89, ...],
   "relabel_suggestions": [
-    {"index": 234, "current_label": 3, "suggested_label": 5, "confidence": 0.82}
+    {
+      "index": 234,
+      "current_label": 3,
+      "suggested_label": 5,
+      "confidence": 0.82
+    }
   ],
   "mode": "safe"
 }
@@ -227,18 +308,20 @@ Removes or flags suspected poisoned samples.
 ### Risk Assessment
 
 #### `POST /collapse_risk`
-Evaluates model training collapse risk.
 
-**Request Body:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dataset_type` | string | No | One of: `image`, `tabular` (default: `image`) |
-| `n_samples` | integer | No | Number of samples (10-50000, default: 1000) |
-| `n_classes` | integer | No | Number of classes (2-100, default: 10) |
-| `poison_ratio` | float | No | Ratio of poisoned samples (0.0-0.5, default: 0.1) |
-| `seed` | integer | No | Random seed (default: 42) |
+Evaluates model training collapse risk for a dataset.
 
-**Response:**
+**Request Body**:
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `dataset_type` | string | ❌ | `image` | One of: `image`, `tabular` |
+| `n_samples` | integer | ❌ | 1000 | Number of samples |
+| `n_classes` | integer | ❌ | 10 | Number of classes |
+| `poison_ratio` | float | ❌ | 0.1 | Ratio of poisoned samples |
+| `seed` | integer | ❌ | 42 | Random seed |
+
+**Response** `200 OK`:
 ```json
 {
   "collapse_risk_score": 35.5,
@@ -251,51 +334,59 @@ Evaluates model training collapse risk.
     "trigger_confidence": 0.25
   },
   "recommendations": [
-    "Dataset appears healthy. Proceed with training."
+    "Consider regularization techniques",
+    "Monitor training loss carefully"
   ],
   "details": {
     "n_samples": 1000,
-    "n_classes": 10
+    "n_classes": 10,
+    "poison_ratio": 0.1
   }
 }
 ```
 
-**Risk Levels:**
-- **LOW** (0-24): Safe to proceed
-- **MEDIUM** (25-49): Review recommended
-- **HIGH** (50-74): Significant issues detected
-- **CRITICAL** (75-100): Unsafe for training
+**Risk Levels**:
+
+| Level | Score | Recommendation |
+|-------|-------|----------------|
+| LOW | 0-24 | Safe to proceed with training |
+| MEDIUM | 25-49 | Review dataset before training |
+| HIGH | 50-74 | Significant issues - cleaning recommended |
+| CRITICAL | 75-100 | Unsafe for training - do not proceed |
 
 ---
 
 ### Report Generation
 
 #### `POST /report`
+
 Generates a comprehensive HTML analysis report.
 
-**Request Body:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `dataset_type` | string | No | One of: `image`, `tabular` (default: `image`) |
-| `n_samples` | integer | No | Number of samples (10-10000, default: 500) |
-| `n_classes` | integer | No | Number of classes (2-50, default: 5) |
-| `poison_ratio` | float | No | Ratio of poisoned samples (0.0-0.5, default: 0.1) |
-| `seed` | integer | No | Random seed (default: 42) |
-| `dataset_name` | string | No | Name for the report (default: `synthetic_dataset`) |
+**Request Body**:
 
-**Response:** HTML document with:
-- Executive summary
-- Detection results table
-- Risk assessment
-- Recommendations
-- Compliance mapping (NIST AI RMF, ISO/IEC 42001, OAIC ADM)
-- Technical appendix
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `dataset_type` | string | ❌ | `image` | One of: `image`, `tabular` |
+| `n_samples` | integer | ❌ | 500 | Number of samples |
+| `n_classes` | integer | ❌ | 5 | Number of classes |
+| `poison_ratio` | float | ❌ | 0.1 | Ratio of poisoned samples |
+| `seed` | integer | ❌ | 42 | Random seed |
+| `dataset_name` | string | ❌ | `synthetic_dataset` | Name for report |
+
+**Response**: HTML document containing:
+
+- 📊 Executive Summary
+- 🔍 Detection Results Table
+- ⚠️ Risk Assessment
+- 💡 Recommendations
+- ✅ Compliance Mapping (NIST AI RMF, ISO/IEC 42001, OAIC ADM)
+- 📎 Technical Appendix
 
 ---
 
-## Error Responses
+## Error Handling
 
-All errors follow this format:
+### Error Response Format
 
 ```json
 {
@@ -305,16 +396,85 @@ All errors follow this format:
 
 ### HTTP Status Codes
 
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 400 | Bad Request - Invalid input |
-| 422 | Validation Error - Missing required fields |
-| 500 | Internal Server Error |
+| Code | Description | Common Causes |
+|------|-------------|---------------|
+| 200 | Success | Request completed successfully |
+| 400 | Bad Request | Invalid parameter values |
+| 422 | Unprocessable Entity | Missing required fields, validation error |
+| 500 | Internal Server Error | Server-side error |
+
+### Validation Errors
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "n_samples"],
+      "msg": "ensure this value is greater than or equal to 10",
+      "type": "value_error.number.not_ge"
+    }
+  ]
+}
+```
+
+---
+
+## Rate Limiting
+
+> **Note**: Rate limiting is not implemented in the current version. For production deployments, consider:
+> - Request rate limiting (e.g., 100 requests/minute)
+> - Payload size limits
+> - Concurrent request limits
 
 ---
 
 ## Interactive Documentation
 
+For interactive API exploration:
+
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+
+---
+
+## SDK Examples
+
+### Python
+
+```python
+import requests
+
+# Detect poisoning
+response = requests.post(
+    "http://localhost:8000/detect_poison",
+    json={
+        "dataset_type": "image",
+        "n_samples": 1000,
+        "poison_ratio": 0.1
+    }
+)
+result = response.json()
+print(f"Poisoning score: {result['poisoning_score']}")
+```
+
+### JavaScript
+
+```javascript
+const response = await fetch('http://localhost:8000/detect_poison', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    dataset_type: 'image',
+    n_samples: 1000,
+    poison_ratio: 0.1
+  })
+});
+const result = await response.json();
+console.log(`Poisoning score: ${result.poisoning_score}`);
+```
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](../CHANGELOG.md) for API version history.
